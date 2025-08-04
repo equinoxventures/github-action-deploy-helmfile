@@ -34,7 +34,7 @@ inputs:
     default: ''
   namespace:
     description: Kubernetes namespace
-    required: true
+    required: false
   image:
     description: Docker image
     required: true
@@ -54,16 +54,16 @@ inputs:
     required: false
   helm_version:
     description: Helm version
-    default: 3.11.1
+    default: 3.18.4
   helmfile_version:
     description: Helmfile version
-    default: 0.143.5
+    default: 1.1.3
   kubectl_version:
     description: Kubectl version
-    default: 1.26.3
+    default: 1.32.3
   chamber_version:
     description: Kubectl version
-    default: 2.11.1
+    default: 2.13.2
   url-resource-type:
     description: The type of the resource to get the URL from
     required: false

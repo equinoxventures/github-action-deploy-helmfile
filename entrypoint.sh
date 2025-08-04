@@ -10,13 +10,44 @@ fi;
 apt-get update && apt-get install -y \
 	kubectl=${KUBECTL_VERSION}-1 \
 	chamber=${CHAMBER_VERSION}-1 \
-	helm=${HELM_VERSION}-1 \
-	helmfile=${HELMFILE_VERSION}-1
+	helm=${HELM_VERSION}-1
 
 helm plugin install https://github.com/databus23/helm-diff --version v${HELM_DIFF_VERSION} \
 	&& helm plugin install https://github.com/aslafy-z/helm-git --version ${HELM_GIT_VERSION} \
+	&& helm plugin install https://github.com/jkroepke/helm-secrets --version v${HELM_SECRETS_VERSION} \
+	&& helm plugin install https://github.com/hypnoglow/helm-s3 --version v${HELM_S3_VERSION} \
 	&& rm -rf $XDG_CACHE_HOME/helm
 
+# Install Helmfile based on architecture and OS
+if [[ -z "$HELMFILE_VERSION" ]]; then
+  echo "HELMFILE_VERSION is not set. Exiting."
+  exit 1
+fi
+
+# Determine target OS and architecture, fallback if not set
+OS="${TARGETOS:-linux}"
+ARCH="${TARGETARCH:-amd64}"
+
+# Map Docker arch to Helmfile naming
+if [[ "$ARCH" == "amd64" ]]; then
+  ARCH_NAME="amd64"
+elif [[ "$ARCH" == "arm64" ]]; then
+  ARCH_NAME="arm64"
+else
+  echo "Unsupported architecture: $ARCH"
+  exit 1
+fi
+
+HELMFILE_URL="https://github.com/helmfile/helmfile/releases/download/v${HELMFILE_VERSION}/helmfile_${HELMFILE_VERSION}_${OS}_${ARCH_NAME}.tar.gz"
+
+echo "Downloading Helmfile from: $HELMFILE_URL"
+curl -L "$HELMFILE_URL" -o helmfile.tar.gz
+tar -xzf helmfile.tar.gz
+chmod +x helmfile
+mv helmfile /usr/local/bin/helmfile
+rm helmfile.tar.gz
+
+echo "Helmfile installed at: /usr/local/bin/helmfile"
 # Used for debugging
 aws ${AWS_ENDPOINT_OVERRIDE:+--endpoint-url $AWS_ENDPOINT_OVERRIDE} sts --region ${AWS_REGION} get-caller-identity
 
@@ -28,7 +59,7 @@ chamber export platform/${CLUSTER_NAME}/${ENVIRONMENT} --format yaml | yq --exit
 
 APPLICATION_HELMFILE=$(pwd)/${HELMFILE_PATH}/${HELMFILE}
 
-BASIC_ARGS="--namespace ${NAMESPACE} --environment ${ENVIRONMENT} --file ${APPLICATION_HELMFILE} --state-values-file /tmp/platform.yaml"
+BASIC_ARGS="--environment ${ENVIRONMENT} --file ${APPLICATION_HELMFILE} --state-values-file /tmp/platform.yaml"
 EXTRA_VALUES_ARGS=""
 DEBUG_ARGS=""
 
