@@ -64,6 +64,21 @@ BASIC_ARGS="--environment ${ENVIRONMENT} --file ${APPLICATION_HELMFILE} --state-
 EXTRA_VALUES_ARGS=""
 DEBUG_ARGS=""
 
+echo "Kubeconfig:"
+cat ~/.kube/config
+
+echo "AWS identity:"
+aws sts get-caller-identity
+
+echo "Current context:"
+kubectl config current-context
+
+echo "Can we talk to the cluster?"
+kubectl get ns || echo "kubectl failed"
+
+echo "Check env for helm:"
+env | grep AWS_
+
 if [[ "${HELM_DEBUG}" == "true" ]]; then
 	DEBUG_ARGS=" --debug"
 fi
