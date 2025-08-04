@@ -32,7 +32,8 @@ RUN apt-get update && apt-get install -y \
     bash \
     yq \
     jq \
-    git
+    git \
+    sops
 
 COPY entrypoint.sh /usr/local/bin/entrypoint
 ENTRYPOINT [ "/usr/local/bin/entrypoint" ]
