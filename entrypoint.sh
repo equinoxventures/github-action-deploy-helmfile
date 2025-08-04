@@ -76,6 +76,10 @@ kubectl config current-context
 echo "Can we talk to the cluster?"
 kubectl get ns || echo "kubectl failed"
 
+echo "config view"
+kubectl config view
+
+echo "Nodes:"
 kubectl get nodes -v=10
 
 echo "Check env for helm:"
