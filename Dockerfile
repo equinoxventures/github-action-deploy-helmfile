@@ -18,13 +18,22 @@ ENV HELM_DATA_HOME=/root/.local/share/helm
 ENV HELM_CONFIG_HOME=/root/.config/helm
 ENV HELM_CACHE_HOME=/root/.cache/helm
 
-RUN pip install awscli
+# Update CA certificates and install required packages
+RUN apt-get update && apt-get install -y ca-certificates apt-utils curl unzip
+
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+      curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+      curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"; \
+    else \
+      echo "Unsupported architecture: $TARGETARCH" && exit 1; \
+    fi && \
+    unzip awscliv2.zip && \
+    ./aws/install && \
+    rm -rf awscliv2.zip aws
 
 # Replace HTTP with HTTPS in sources.list
 RUN sed -i 's|http://deb.debian.org|https://deb.debian.org|g' /etc/apt/sources.list
-
-# Update CA certificates and install required packages
-RUN apt-get update && apt-get install -y ca-certificates apt-utils curl
 
 RUN curl -1sLf 'https://dl.cloudsmith.io/public/cloudposse/packages/cfg/setup/bash.deb.sh' | bash
 
