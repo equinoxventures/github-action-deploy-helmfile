@@ -64,27 +64,6 @@ BASIC_ARGS="--environment ${ENVIRONMENT} --file ${APPLICATION_HELMFILE} --state-
 EXTRA_VALUES_ARGS=""
 DEBUG_ARGS=""
 
-echo "Kubeconfig:"
-cat ~/.kube/config
-
-echo "AWS identity:"
-aws sts get-caller-identity
-
-echo "Current context:"
-kubectl config current-context
-
-echo "Can we talk to the cluster?"
-kubectl get ns || echo "kubectl failed"
-
-echo "config view"
-kubectl config view
-
-echo "Nodes:"
-kubectl get nodes -v=10
-
-echo "Check env for helm:"
-env | grep AWS_
-
 if [[ "${HELM_DEBUG}" == "true" ]]; then
 	DEBUG_ARGS=" --debug"
 fi
@@ -96,42 +75,8 @@ if [[ -n "$HELM_VALUES_YAML" ]]; then
   EXTRA_VALUES_ARGS="--state-values-file /tmp/extra_helm_values.yml"
 fi
 
-if [[ "${OPERATION}" == "deploy" ]]; then
-	OPERATION_COMMAND="helmfile ${BASIC_ARGS} ${EXTRA_VALUES_ARGS} ${DEBUG_ARGS} apply"
-	echo "Executing: ${OPERATION_COMMAND}"
-	${OPERATION_COMMAND}
-
-	RELEASES=$(helmfile ${BASIC_ARGS} ${EXTRA_VALUES_ARGS} ${DEBUG_ARGS} list --output json | jq .[].name -r)
-  for RELEASE in ${RELEASES}
-  do
-    echo "Processing release: ${RELEASE}"
-    echo "Executing kubectl command: kubectl --namespace ${NAMESPACE} get -l ${RELEASE_LABEL_NAME}=${RELEASE} ${URL_RESOURCE_TYPE} -o json"
-    ENTRYPOINT=$(kubectl --namespace ${NAMESPACE} get -l ${RELEASE_LABEL_NAME}=${RELEASE} ${URL_RESOURCE_TYPE} -o json | jq --raw-output '[.items[].metadata.annotations["outputs.webapp-url"]] | first')
-    if [[ "${ENTRYPOINT}" != "" ]]; then
-      echo "Found webapp-url for release ${RELEASE}: ${ENTRYPOINT}"
-      echo "webapp-url=${ENTRYPOINT}" >> $GITHUB_OUTPUT
-    else
-      echo "No webapp-url found for release ${RELEASE}"
-    fi
-  done
-
-
-elif [[ "${OPERATION}" == "destroy" ]]; then
-
-	set +e
-	kubectl get ns ${NAMESPACE}
-	NAMESPACE_EXISTS=$?
-	set -e
-
-	if [[ ${NAMESPACE_EXISTS} -eq 0  ]]; then
-		OPERATION_COMMAND="helmfile ${BASIC_ARGS} ${EXTRA_VALUES_ARGS} ${DEBUG_ARGS} destroy"
-		echo "Executing: ${OPERATION_COMMAND}"
-		${OPERATION_COMMAND}
-
-		RELEASES_COUNTS=$(helm --namespace ${NAMESPACE} list --output json | jq 'length')
-
-    if [[ "${RELEASES_COUNTS}" == "0" ]]; then
-    	kubectl delete ns ${NAMESPACE}
-    fi
-  fi
+# Run helmfile diff if ENVIRONMENT variable is set
+if [[ -n "$ENVIRONMENT" ]]; then
+  echo "Running helmfile diff for environment: ${ENVIRONMENT}"
+  helmfile diff -e ${ENVIRONMENT}
 fi

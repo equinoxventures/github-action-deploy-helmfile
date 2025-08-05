@@ -1,6 +1,6 @@
 name: 'Deploy HelmFile'
 description: 'Deploy on Kubernetes with HelmFile'
-author: hello@cloudposse.com
+author: amrut@eqx.vc
 branding:
   icon: 'file-text'
   color: 'white'
@@ -64,10 +64,6 @@ inputs:
   chamber_version:
     description: Kubectl version
     default: 2.11.1
-  url-resource-type:
-    description: The type of the resource to get the URL from
-    required: false
-    default: 'ingress'
 outputs:
   webapp-url:
     description: "Web Application url"
@@ -92,4 +88,3 @@ runs:
     HELM_VERSION: ${{ inputs.helm_version }}
     HELMFILE_VERSION: ${{ inputs.helmfile_version }}
     CHAMBER_VERSION: ${{ inputs.chamber_version }}
-    URL_RESOURCE_TYPE: ${{ inputs.url-resource-type }}
