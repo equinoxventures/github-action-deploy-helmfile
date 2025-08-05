@@ -77,6 +77,32 @@ fi
 
 # Run helmfile diff if ENVIRONMENT variable is set
 if [[ -n "$ENVIRONMENT" ]]; then
+  OPERATION_COMMAND="helmfile ${BASIC_ARGS} ${EXTRA_VALUES_ARGS} ${DEBUG_ARGS} diff"
   echo "Running helmfile diff for environment: ${ENVIRONMENT}"
-  helmfile diff -e ${ENVIRONMENT}
+  ${OPERATION_COMMAND}
+fi
+
+if [[ "${OPERATION}" == "deploy" ]]; then
+	OPERATION_COMMAND="helmfile ${BASIC_ARGS} ${EXTRA_VALUES_ARGS} ${DEBUG_ARGS} apply"
+	echo "Executing: ${OPERATION_COMMAND}"
+	${OPERATION_COMMAND}
+
+elif [[ "${OPERATION}" == "destroy" ]]; then
+
+	set +e
+	kubectl get ns ${NAMESPACE}
+	NAMESPACE_EXISTS=$?
+	set -e
+
+	if [[ ${NAMESPACE_EXISTS} -eq 0  ]]; then
+		OPERATION_COMMAND="helmfile ${BASIC_ARGS} ${EXTRA_VALUES_ARGS} ${DEBUG_ARGS} destroy"
+		echo "Executing: ${OPERATION_COMMAND}"
+		${OPERATION_COMMAND}
+
+		RELEASES_COUNTS=$(helm --namespace ${NAMESPACE} list --output json | jq 'length')
+
+    if [[ "${RELEASES_COUNTS}" == "0" ]]; then
+    	kubectl delete ns ${NAMESPACE}
+    fi
+  fi
 fi
