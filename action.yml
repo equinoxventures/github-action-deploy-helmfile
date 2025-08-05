@@ -21,9 +21,9 @@ inputs:
     required: false
     default: helmfile.yaml
   operation:
-    description: Operation with helmfiles. (valid options - `deploy`, `destroy`)
+    description: Operation with helmfiles. (valid options - `apply`, `destroy`, `sync`)
     required: true
-    default: deploy
+    default: apply
   environment:
     description: Helmfile environment
     required: false

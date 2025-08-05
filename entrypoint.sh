@@ -87,6 +87,11 @@ if [[ "${OPERATION}" == "deploy" ]]; then
 	echo "Executing: ${OPERATION_COMMAND}"
 	${OPERATION_COMMAND}
 
+elif [[ "${OPERATION}" == "sync" ]]; then
+	OPERATION_COMMAND="helmfile ${BASIC_ARGS} ${EXTRA_VALUES_ARGS} ${DEBUG_ARGS} sync"
+	echo "Executing: ${OPERATION_COMMAND}"
+	${OPERATION_COMMAND}
+
 elif [[ "${OPERATION}" == "destroy" ]]; then
 
 	set +e
