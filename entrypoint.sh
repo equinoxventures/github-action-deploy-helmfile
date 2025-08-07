@@ -75,6 +75,10 @@ if [[ -n "$HELM_VALUES_YAML" ]]; then
   EXTRA_VALUES_ARGS="--state-values-file /tmp/extra_helm_values.yml"
 fi
 
+if [[ "${INCLUDE_NEEDS}" == "true" ]]; then
+  EXTRA_VALUES_ARGS="${EXTRA_VALUES_ARGS} --include-needs true"
+fi
+
 # Run helmfile diff if ENVIRONMENT variable is set
 if [[ -n "$ENVIRONMENT" ]]; then
   OPERATION_COMMAND="helmfile ${BASIC_ARGS} ${EXTRA_VALUES_ARGS} ${DEBUG_ARGS} diff"
