@@ -86,7 +86,7 @@ if [[ -n "$ENVIRONMENT" ]]; then
   ${OPERATION_COMMAND}
 fi
 
-if [[ "${OPERATION}" == "deploy" ]]; then
+if [[ "${OPERATION}" == "apply" ]]; then
 	OPERATION_COMMAND="helmfile ${BASIC_ARGS} ${EXTRA_VALUES_ARGS} ${DEBUG_ARGS} apply"
 	echo "Executing: ${OPERATION_COMMAND}"
 	${OPERATION_COMMAND}
