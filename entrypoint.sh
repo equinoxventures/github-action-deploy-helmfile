@@ -79,6 +79,9 @@ if [[ "${INCLUDE_NEEDS}" == "true" ]]; then
   EXTRA_VALUES_ARGS="${EXTRA_VALUES_ARGS} --include-needs true"
 fi
 
+if [[ -n "${IMAGE_TAG}" ]]; then
+	EXTRA_VALUES_ARGS="${EXTRA_VALUES_ARGS} --set deployApplication.application.imageVersion=${IMAGE_TAG}"
+fi
 
 if [[ "${OPERATION}" == "apply" ]]; then
 	OPERATION_COMMAND="helmfile ${BASIC_ARGS} ${EXTRA_VALUES_ARGS} ${DEBUG_ARGS} apply"
@@ -98,7 +101,7 @@ elif [[ "${OPERATION}" == "destroy" ]]; then
 	set -e
 
 	if [[ ${NAMESPACE_EXISTS} -eq 0  ]]; then
-		OPERATION_COMMAND="helmfile ${BASIC_ARGS} ${EXTRA_VALUES_ARGS} ${DEBUG_ARGS} destroy"
+		OPERATION_COMMAND="helmfile ${BASIC_ARGS} ${DEBUG_ARGS} destroy"
 		echo "Executing: ${OPERATION_COMMAND}"
 		${OPERATION_COMMAND}
 

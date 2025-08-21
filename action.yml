@@ -41,10 +41,10 @@ inputs:
     required: false
   image:
     description: Docker image
-    required: true
+    required: false
   image-tag:
     description: Docker image tag
-    required: true
+    required: false
   debug:
     description: Debug mode
     default: 'false'
