@@ -52,8 +52,13 @@ echo "Helmfile installed at: /usr/local/bin/helmfile"
 # Used for debugging
 aws ${AWS_ENDPOINT_OVERRIDE:+--endpoint-url $AWS_ENDPOINT_OVERRIDE} sts --region ${AWS_REGION} get-caller-identity
 
-# Login to Kubernetes Cluster.
-aws ${AWS_ENDPOINT_OVERRIDE:+--endpoint-url $AWS_ENDPOINT_OVERRIDE} eks --region ${AWS_REGION} update-kubeconfig --name ${CLUSTER_NAME}
+# Login to Kubernetes Cluster only if deploy-to-aws is true.
+if [[ "${DEPLOY_TO_AWS}" == "true" ]]; then
+  echo "Logging into AWS EKS cluster..."
+  aws ${AWS_ENDPOINT_OVERRIDE:+--endpoint-url $AWS_ENDPOINT_OVERRIDE} eks --region ${AWS_REGION} update-kubeconfig --name ${CLUSTER_NAME}
+else
+  echo "Skipping AWS EKS cluster login (deploy-to-aws is not true)"
+fi
 
 # Read platform specific configs/info
 chamber export platform/${CLUSTER_NAME}/${ENVIRONMENT} --format yaml | yq --exit-status --no-colors  eval '{"platform": .}' - > /tmp/platform.yaml
